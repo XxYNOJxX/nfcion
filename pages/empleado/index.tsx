@@ -1,3 +1,4 @@
+// pages/empleado/index.tsx
 import { useEffect, useState } from "react"
 import { useRouter } from "next/router"
 import { supabase } from "@/lib/supabaseClient"
@@ -7,6 +8,7 @@ type Resena = {
   texto: string
   puntuacion: number
   created_at: string
+  numero_mesa?: number
 }
 
 export default function EmpleadoHome() {
@@ -22,23 +24,26 @@ export default function EmpleadoHome() {
 
       if (!user) return router.push("/login")
 
-      // Verificar rol
-      const { data: usuario, error } = await supabase
+      const { data: usuario, error: usuarioError } = await supabase
         .from("usuarios")
         .select("rol")
         .eq("id", user.id)
         .single()
 
-      if (error || usuario?.rol !== "empleado") {
+      if (usuarioError || usuario?.rol !== "empleado") {
         return router.push("/login")
       }
 
-      // Obtener reseñas del empleado
-      const { data: resenaData } = await supabase
+      const { data: resenaData, error: resenaError } = await supabase
         .from("resenas")
-        .select("id, texto, puntuacion, created_at")
+        .select("id, texto, puntuacion, created_at, numero_mesa")
         .eq("empleado_id", user.id)
         .order("created_at", { ascending: false })
+
+      if (resenaError) {
+        alert("❌ Error al cargar reseñas")
+        return
+      }
 
       setResenas(resenaData ?? [])
       setLoading(false)
@@ -60,7 +65,8 @@ export default function EmpleadoHome() {
           resenas.map((resena) => (
             <div key={resena.id} style={styles.reviewCard}>
               <div style={styles.header}>
-                <strong>{new Date(resena.created_at).toLocaleDateString()}</strong>
+                <strong>Mesa {resena.numero_mesa ?? "-"}</strong>
+                <span>{new Date(resena.created_at).toLocaleDateString()}</span>
               </div>
               <p style={styles.text}>{resena.texto}</p>
               <div style={styles.stars}>
@@ -75,7 +81,7 @@ export default function EmpleadoHome() {
   )
 }
 
-const styles = {
+const styles: { [key: string]: React.CSSProperties } = {
   container: {
     backgroundColor: "#b8c7bf",
     minHeight: "100vh",
@@ -94,7 +100,7 @@ const styles = {
   },
   title: {
     marginBottom: "24px",
-    textAlign: "center" as const,
+    textAlign: "center",
     color: "#2c3e50"
   },
   reviewCard: {
