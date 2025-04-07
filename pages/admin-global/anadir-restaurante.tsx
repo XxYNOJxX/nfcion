@@ -1,59 +1,81 @@
-// pages/admin-restaurante/anadir-restaurante.tsx
-export default function Contacto() {
-  const styles = {
-    container: {
-      minHeight: "100vh",
-      backgroundColor: "#b8c7bf",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: "40px",
-      textAlign: "center" as const
-    },
-    card: {
-      backgroundColor: "#e7ece9",
-      padding: "40px",
-      borderRadius: "16px",
-      boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
-      maxWidth: "500px",
-      width: "100%"
-    },
-    title: {
-      fontSize: "28px",
-      color: "#2c3e50",
-      marginBottom: "24px"
-    },
-    info: {
-      fontSize: "16px",
-      color: "#2c3e50",
-      marginBottom: "16px"
-    },
-    highlight: {
-      fontWeight: "bold" as const,
-      color: "#617068"
+// pages/admin-global/anadir-restaurante.tsx
+import { useState } from "react"
+import { supabase } from "@/lib/supabaseClient"
+
+export default function AnadirRestaurante() {
+  const [nombre, setNombre] = useState("")
+
+  const handleCrear = async () => {
+    if (!nombre.trim()) return alert("Introduce un nombre")
+
+    const { error } = await supabase.from("restaurante").insert([{ nombre }])
+
+    if (error) {
+      alert("❌ Error al crear restaurante")
+      console.error(error)
+    } else {
+      alert("✅ Restaurante creado correctamente")
+      setNombre("")
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleCrear()
+  }
+
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Contacto</h1>
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(to bottom right, #D6DED9, #A9B9AF)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 24
+    }}>
+      <div style={{
+        background: "#ffffffcc",
+        padding: "40px",
+        borderRadius: "16px",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+        minWidth: "360px",
+        textAlign: "center"
+      }}>
+        <h1 style={{ marginBottom: 24, color: "#1c1c1c" }}>Crear nuevo restaurante</h1>
 
-        <p style={styles.info}>
-          ¿Tienes dudas o quieres formar parte de <span style={styles.highlight}>NFCión</span>?
-        </p>
+        <input
+          placeholder="Nombre del restaurante"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          onKeyDown={handleKeyDown}
+          style={{
+            padding: 12,
+            width: "100%",
+            marginBottom: 16,
+            borderRadius: 8,
+            border: "1px solid #999",
+            outline: "none",
+            fontSize: 16,
+            color: "#1c1c1c",
+            background: "#f0f4f1"
+          }}
+        />
 
-        <p style={styles.info}>
-          📞 Teléfono: <span style={styles.highlight}>+34 612 345 678</span>
-        </p>
-
-        <p style={styles.info}>
-          📧 Correo: <span style={styles.highlight}>contacto@nfcion.com</span>
-        </p>
-
-        <p style={styles.info}>
-          Estaremos encantados de ayudarte 🤝
-        </p>
+        <button
+          onClick={handleCrear}
+          style={{
+            padding: "12px 20px",
+            backgroundColor: "#5C665D",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "16px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            width: "100%"
+          }}
+        >
+          Crear restaurante
+        </button>
       </div>
     </div>
   )
