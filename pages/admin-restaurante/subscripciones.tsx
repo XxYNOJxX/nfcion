@@ -13,19 +13,8 @@ export default function Subscripciones() {
       const { data: session } = await supabase.auth.getUser()
       const userId = session?.user?.id
       if (!userId) return
-
-      const { data: usuario } = await supabase
-        .from("usuarios")
-        .select("plan, rol")
-        .eq("id", userId)
-        .single()
-
-      if (!usuario || usuario.rol !== "admin_restaurante") {
-        router.push("/login")
-        return
-      }
-
-      setPlan(usuario.plan || "")
+      const { data } = await supabase.from("usuarios").select("plan").eq("id", userId).single()
+      setPlan(data?.plan || "")
     }
 
     fetchPlan()
@@ -45,8 +34,8 @@ export default function Subscripciones() {
             <CreditCard size={20} />
             <span>Suscripción</span>
           </div>
-          <p style={styles.description}>Plan actual: <strong>{plan || "Sin plan"}</strong></p>
-          <button style={styles.button} onClick={() => goTo("/admin-restaurante/comprar-subscripciones")}>
+          <p style={styles.description}>Plan actual: <strong>{plan ? plan : "Sin plan"}</strong></p>
+          <button style={styles.button} onClick={() => goTo("/admin-restaurante/comprar-subscripcion")}>
             Suscribirse al plan premium
           </button>
         </div>
